@@ -36,6 +36,19 @@ const readAndAppend = (content, file) => {
         writeToFile(file, parsedData);
         }
     });
+    };
+
+const readAndDelete = (toDelete, file) => {
+    fs.readFile(file, 'utf8', (err, data) => {
+        if (err) {
+        console.error(err);
+        } else {
+        const parsedData = JSON.parse(data);
+        let index = parsedData.find( note => note.id == toDelete)
+        parsedData.splice(index, 1);
+        writeToFile(file, parsedData);
+        }
+    });
 }; 
 
 app.get('/api/notes', (req, res) => {
@@ -61,6 +74,24 @@ app.post('/api/notes', (req, res) => {
         res.error('Error in adding note');
     }    
 });
+
+app.delete('/api/notes/:id', (req, res) => {
+    console.info(`${req.method} request received to delete`);
+
+    const { title, text } = req.body;
+
+    if (req.body) {
+        const deleteNote = {
+            title, 
+            text
+        };
+
+        readAndDelete(deleteNote, './db/db.json');
+        res.json(`Note removed successfully!`);
+    } else {
+        res.error('Error in adding note');
+    }    
+})
 
 app.listen(PORT, () =>
     console.log(`App listening at http://localhost:${PORT}`)
